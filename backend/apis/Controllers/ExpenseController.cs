@@ -5,29 +5,19 @@ using System.Reflection.PortableExecutable;
 
 namespace apis.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/expense")]
     [ApiController]
     public class ExpenseController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult GetExpenses([FromQuery]ExpenseDTO expenseDto)
-        {
-            return Ok(new[] { "Expense1", "Expense2", "Expense3" });
-        }
-
         [HttpPost("add")]
-        public ActionResult<Result> AddExpense([FromBody] ExpenseDTO expenseDto)
+        public ActionResult<Result> AddExpense([FromBody] ExpenseModel expenseDto)
         {
             var result = new Result();
             try
             {
-
+                
             }
-            catch(Exception ex)
-            {
-
-            }
-            finally
+            catch (Exception ex)
             {
 
             }
