@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace apis.Models
+namespace apis.Models.Expense
 {
     public class ExpenseModel
     {

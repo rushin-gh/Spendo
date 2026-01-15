@@ -1,4 +1,4 @@
-﻿using apis.Models;
+﻿using apis.Models.Expense;
 using Microsoft.EntityFrameworkCore;
 
 namespace apis.Database
