@@ -35,6 +35,12 @@ use SpendoDB;
 --Data Source=Rushi\SQLEXPRESS;Initial Catalog=SpendoDB;User Id=spendo_app_user;Password=spendo_app_password
 
 
+---- Created user for migrations
+--create login spendo_db_owner with password = 'spendo_db_owner_pass', check_policy = on;
+--create user spendo_db_owner for login spendo_db_owner;
+--ALTER ROLE db_owner ADD MEMBER spendo_db_owner;
 
-ALTER ROLE db_owner ADD MEMBER migration_user;
+ --select * from Expenses
 
+ --Insert into expenses values
+ --('Tea', NULL, 10, GETDATE())
