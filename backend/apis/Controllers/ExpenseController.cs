@@ -20,34 +20,55 @@ namespace apis.Controllers
         }
 
         [HttpGet("get")]
-        public ActionResult<List<ExpenseResponseDTO>> GetExpenses()
+        public ActionResult<List<ExpenseWithIdDTO>> GetExpenses()
         {
-            List<ExpenseResponseDTO> expensesDto = new List<ExpenseResponseDTO>();
+            List<ExpenseWithIdDTO> expensesWithIds = new List<ExpenseWithIdDTO>();
             try
             {
-                var expenses = _appDbContext.Expenses.ToList();
-                expenses.ForEach(exp =>
-                {
-                    expensesDto.Add(
-                        new ExpenseResponseDTO
+                var dbExpenses = _appDbContext.Expenses;
+                expensesWithIds
+                    .AddRange(dbExpenses.Select(
+                        exp => new ExpenseWithIdDTO
                         {
                             Id = exp.Id,
                             Title = exp.Title,
                             Amount = exp.Amount,
                             Description = exp.Description
                         }
-                    );
-                });
+                    )
+                );
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Exception logging
             }
-            return Ok(expensesDto);
+            return Ok(expensesWithIds);
+        }
+
+        [HttpGet("get/{id}")]
+        public ActionResult<ExpenseWithIdDTO> GetSingleExpenses(int id)
+        {
+            ExpenseWithIdDTO expenseWithId = new ExpenseWithIdDTO();
+            try
+            {
+                var dbExpenseWithId = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == id);
+                expenseWithId = new ExpenseWithIdDTO
+                {
+                    Id = dbExpenseWithId.Id,
+                    Amount = dbExpenseWithId.Amount,
+                    Title = dbExpenseWithId.Title,
+                    Description = dbExpenseWithId.Description
+                };
+            }
+            catch (Exception ex)
+            {
+                // Exception logging
+            }
+            return Ok(expenseWithId);
         }
 
         [HttpPost("add")]
-        public ActionResult<Result> AddExpense([FromQuery] ExpenseCreateDTO expenseDto)
+        public ActionResult<Result> AddExpense([FromBody] ExpenseDTO expenseDto)
         {
             var result = new Result();
             try
@@ -73,6 +94,15 @@ namespace apis.Controllers
             {
                 // Exception Logging
             }
+            return Ok(result);
+        }
+
+        [HttpPost("update")]
+        public ActionResult<Result> UpdateExpense(ExpenseWithIdDTO expenseWithId)
+        {
+            Result result = new Result();
+
+
             return Ok(result);
         }
     }
