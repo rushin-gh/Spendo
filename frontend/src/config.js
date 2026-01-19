@@ -1,0 +1,1 @@
+export const SPENDO_APP_BASE_URL = process.env.PARCEL_SPENDO_APP_BASE_URL;

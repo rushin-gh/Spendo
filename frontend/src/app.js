@@ -1,10 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import Body from "./components/body";
 
 const App = () => {
   return (
     <div>
-      <h1>Spendo App</h1>
+      <div>Header</div>
+      <Body />
+      <div>Footer</div>
     </div>
   );
 };
