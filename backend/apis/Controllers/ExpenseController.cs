@@ -5,6 +5,7 @@ using System.Reflection.PortableExecutable;
 using apis.Database;
 using apis.Models.Expense;
 using apis.Models.Expense.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace apis.Controllers
 {
@@ -46,12 +47,12 @@ namespace apis.Controllers
         }
 
         [HttpGet("get/{id}")]
-        public ActionResult<ExpenseWithIdDTO> GetSingleExpenses(int id)
+        public ActionResult<ExpenseWithIdDTO> GetSingleExpense([FromRoute(Name = "id")]int expId)
         {
             ExpenseWithIdDTO expenseWithId = new ExpenseWithIdDTO();
             try
             {
-                var dbExpenseWithId = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == id);
+                var dbExpenseWithId = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId);
                 expenseWithId = new ExpenseWithIdDTO
                 {
                     Id = dbExpenseWithId.Id,
@@ -101,7 +102,66 @@ namespace apis.Controllers
         public ActionResult<Result> UpdateExpense(ExpenseWithIdDTO expenseWithId)
         {
             Result result = new Result();
+            try
+            {
+                ExpenseModel expenseModel = new ExpenseModel
+                {
+                    Id = expenseWithId.Id,
+                    Amount = expenseWithId.Amount,
+                    Description = expenseWithId.Description,
+                    Title = expenseWithId.Title
+                };
 
+                if (_appDbContext.Expenses.Any(exp => exp.Id == expenseModel.Id))
+                {
+                    _appDbContext.Expenses.Update(expenseModel);
+                    _appDbContext.SaveChanges();
+
+                    result.IsSuccess = true;
+                    result.Message = $"Expense with id {expenseModel.Id} has been successfully updated.";
+                }
+                else
+                {
+                    result.IsSuccess = false;
+                    result.Message = $"Expense with id {expenseModel.Id} does not exists in database.";
+                }
+            }
+            catch(Exception ex)
+            {
+                // Exception logging
+                result.IsSuccess = false;
+                result.Message = ex.Message;
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("delete/{id}")]
+        public ActionResult<Result> DeleteExpense([FromRoute(Name = "id")]int expId)
+        {
+            Result result = new Result();
+            try
+            {
+                if (_appDbContext.Expenses.Any(exp => exp.Id == expId))
+                {
+                    _appDbContext.Expenses.Where(exp => exp.Id == expId).ExecuteDelete();
+                    _appDbContext.SaveChanges();
+
+                    result.IsSuccess = true;
+                    result.Message = $"Expense with id {expId} has been successfully deleted.";
+                }
+                else
+                {
+                    result.IsSuccess = false;
+                    result.Message = $"Expense with id {expId} does not exists in database.";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Exception logging
+                result.IsSuccess = false;
+                result.Message = ex.Message;
+            }
 
             return Ok(result);
         }
