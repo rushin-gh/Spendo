@@ -1,0 +1,16 @@
+* {
+  background-color: rgb(199, 195, 195);
+}
+
+table {
+  border: 1px solid black;
+  border-spacing: 0;
+}
+
+th,
+td {
+  border: 1px solid black;
+  border-spacing: 0;
+
+  padding: 5px;
+}
