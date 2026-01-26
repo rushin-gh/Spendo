@@ -1,13 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Body from "./components/body";
+import Header from "./components/header";
+import Body from "./components/Body/body";
+import Footer from "./components/footer";
 
 const App = () => {
   return (
     <div>
-      <div>Header</div>
+      <Header />
       <Body />
-      <div>Footer</div>
+      <Footer />
     </div>
   );
 };
