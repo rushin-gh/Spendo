@@ -12,7 +12,7 @@ namespace apis.Models.Expense
         public string? Description { get; set; }
 
         [Required, MaxLength(200)]
-        public decimal Amount { get; set; }
+        public decimal? Amount { get; set; }
 
         [Required]
         public DateTime Date { get; set; }

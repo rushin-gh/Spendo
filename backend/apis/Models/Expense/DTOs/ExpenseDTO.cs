@@ -7,6 +7,6 @@ namespace apis.Models.Expense.DTOs
 
         public string? Description { get; set; }
 
-        public decimal Amount { get; set; }
+        public decimal? Amount { get; set; }
     }
 }

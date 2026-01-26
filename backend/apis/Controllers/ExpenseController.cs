@@ -47,7 +47,7 @@ namespace apis.Controllers
         }
 
         [HttpGet("get/{id}")]
-        public ActionResult<ExpenseWithIdDTO> GetSingleExpense([FromRoute(Name = "id")]int expId)
+        public ActionResult<ExpenseWithIdDTO> GetSingleExpense([FromRoute(Name = "id")] int expId)
         {
             ExpenseWithIdDTO expenseWithId = new ExpenseWithIdDTO();
             try
@@ -98,35 +98,43 @@ namespace apis.Controllers
             return Ok(result);
         }
 
-        [HttpPost("update")]
-        public ActionResult<Result> UpdateExpense(ExpenseWithIdDTO expenseWithId)
+        [HttpPatch("update/{id}")]
+        public ActionResult<Result> UpdateExpense([FromRoute(Name = "id")] int expId, [FromBody] ExpenseDTO expenseDto)
         {
             Result result = new Result();
             try
             {
-                ExpenseModel expenseModel = new ExpenseModel
-                {
-                    Id = expenseWithId.Id,
-                    Amount = expenseWithId.Amount,
-                    Description = expenseWithId.Description,
-                    Title = expenseWithId.Title
-                };
+                var expense = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId);
 
-                if (_appDbContext.Expenses.Any(exp => exp.Id == expenseModel.Id))
-                {
-                    _appDbContext.Expenses.Update(expenseModel);
-                    _appDbContext.SaveChanges();
-
-                    result.IsSuccess = true;
-                    result.Message = $"Expense with id {expenseModel.Id} has been successfully updated.";
-                }
-                else
+                if (expense == null)
                 {
                     result.IsSuccess = false;
-                    result.Message = $"Expense with id {expenseModel.Id} does not exists in database.";
+                    result.Message = $"Expense with id {expId} does not exists in database.";
+                    return BadRequest(result);
                 }
+
+                if (expenseDto.Amount.HasValue)
+                {
+                    expense.Amount = expenseDto.Amount;
+                }
+
+                if (expenseDto.Title != null)
+                {
+                    expense.Title = expenseDto.Title;
+                }
+
+                if (expenseDto.Description != null)
+                {
+                    expense.Description = expenseDto.Description;
+                }
+
+                _appDbContext.SaveChanges();
+
+                result.IsSuccess = true;
+                result.Message = $"Expense with id {expId} has been successfully updated.";
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Exception logging
                 result.IsSuccess = false;
@@ -137,7 +145,7 @@ namespace apis.Controllers
         }
 
         [HttpPost("delete/{id}")]
-        public ActionResult<Result> DeleteExpense([FromRoute(Name = "id")]int expId)
+        public ActionResult<Result> DeleteExpense([FromRoute(Name = "id")] int expId)
         {
             Result result = new Result();
             try
