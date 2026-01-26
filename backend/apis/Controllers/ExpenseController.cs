@@ -71,6 +71,9 @@ namespace apis.Controllers
         [HttpPost("add")]
         public ActionResult<Result> AddExpense([FromBody] ExpenseDTO expenseDto)
         {
+            // TODO : Validate input if the necessary fields are null if not send bad request
+
+
             var result = new Result();
             try
             {
@@ -93,7 +96,9 @@ namespace apis.Controllers
             }
             catch (Exception ex)
             {
-                // Exception Logging
+                result.IsSuccess = true;
+                result.Message = ex.Message;
+                return Problem(ex.Message);
             }
             return Ok(result);
         }
