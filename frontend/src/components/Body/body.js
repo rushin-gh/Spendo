@@ -70,6 +70,7 @@ const Body = () => {
       <div id="body">
         <ExpenseAdd
           editingExpense={editingExpense}
+          setEditingExpense={setEditingExpense}
           onSave={() => {
             setEditingExpense(null);
             loadExpenses();

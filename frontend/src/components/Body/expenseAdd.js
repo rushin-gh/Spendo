@@ -1,36 +1,13 @@
 import { useEffect, useState } from "react";
 import { SPENDO_APP_BASE_URL } from "../../config";
 
-const ExpenseAdd = ({ editingExpense, onSave }) => {
+const ExpenseAdd = ({ editingExpense, setEditingExpense, onSave }) => {
+  console.log("ExpenseAdd component called.");
+  console.log(editingExpense);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-
-  // const AddExpense = async () => {
-  //   // Validation on client side
-  //   if (title == "" || description == "" || amount == "") {
-  //     return;
-  //   }
-
-  //   const expense = {
-  //     title: title,
-  //     description: description,
-  //     amount: amount,
-  //   };
-
-  //   const url = SPENDO_APP_BASE_URL + "/api/expense/add";
-  //   try {
-  //     const response = await fetch(url, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(expense),
-  //     });
-  //   } catch (error) {
-  //     console.log(error.Message);
-  //   }
-  // };
 
   const handleSubmit = async () => {
     if (!editingExpense && (title == "" || description == "" || amount == "")) {
@@ -46,7 +23,7 @@ const ExpenseAdd = ({ editingExpense, onSave }) => {
       ? `${SPENDO_APP_BASE_URL}/api/expense/update/${editingExpense.id}`
       : `${SPENDO_APP_BASE_URL}/api/expense/add`;
 
-    const method = editingExpense ? "PUT" : "POST";
+    const method = editingExpense ? "PATCH" : "POST";
     try {
       const response = await fetch(url, {
         method: method,
@@ -58,9 +35,12 @@ const ExpenseAdd = ({ editingExpense, onSave }) => {
     } catch (error) {
       console.log(error.Message);
     }
+
+    onSave();
   };
 
-  useEffect(() => {
+  const handleInputs = () => {
+    console.log(editingExpense);
     if (editingExpense) {
       setTitle(editingExpense.title);
       setDescription(editingExpense.description);
@@ -70,7 +50,16 @@ const ExpenseAdd = ({ editingExpense, onSave }) => {
       setDescription("");
       setAmount("");
     }
-  });
+  };
+
+  useEffect(() => {
+    console.log("ExpenseAdd useEffect called.");
+    handleInputs();
+  }, [editingExpense]);
+
+  const handleCancel = () => {
+    setEditingExpense(null);
+  };
 
   return (
     <div id="expInp">
@@ -98,6 +87,11 @@ const ExpenseAdd = ({ editingExpense, onSave }) => {
       <button type="submit" onClick={handleSubmit}>
         {editingExpense ? "Update" : "Submit"}
       </button>
+      {editingExpense && (
+        <button type="submit" onClick={() => setEditingExpense(null)}>
+          Cancel
+        </button>
+      )}
     </div>
   );
 };
