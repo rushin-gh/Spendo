@@ -44,3 +44,6 @@ use SpendoDB;
 
  --Insert into expenses values
  --('Tea', NULL, 10, GETDATE())
+
+ --INSERT INTO Expenses
+ --SELECT Title, Description, Amount, Date FROM Expenses
