@@ -1,10 +1,12 @@
 ﻿namespace apis.Models
 {
-    public class Result
+    public class Result<T>
     {
         public bool IsSuccess { get; set; }
 
         public string? Message { get; set; }
+
+        public T Data { get; set; }
 
         public Result()
         {
@@ -21,5 +23,15 @@
         {
             Message = msg;
         }
+
+
+        public Result(bool isSuccess, string? message, T data) : this(isSuccess, message)
+        {
+            Data = data;
+        }
+
+        public static Result<T> Success(string message, T data) => new(true, message, data);
+
+        public static Result<T> Failure(string message) => new(false, message, default);
     }
 }
