@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { SPENDO_APP_BASE_URL } from "../../config.js";
 import ExpenseAdd from "./expenseAdd.js";
 
 const Body = () => {
@@ -16,50 +15,6 @@ const Body = () => {
   useEffect(() => {
     loadExpenses();
   }, []);
-
-  const GetAllExpenses = async () => {
-    const url = `${SPENDO_APP_BASE_URL}/api/expense/get`;
-
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Api thrown some error.");
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (err) {
-      console.log("Error");
-    }
-  };
-
-  const DeleteExpense = async (expId) => {
-    const url = `${SPENDO_APP_BASE_URL}/api/expense/delete/${expId}`;
-
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Api thrown some error.");
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (err) {
-      console.log("Error");
-    }
-  };
 
   if (expenses == null) {
     return <div id="body">Error while loading expenses</div>;
