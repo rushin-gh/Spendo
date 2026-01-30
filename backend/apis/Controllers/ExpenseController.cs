@@ -69,10 +69,10 @@ namespace apis.Controllers
         }
 
         [HttpPost("add")]
-        public ActionResult<Result<string>> AddExpense([FromBody] ExpenseDTO expenseDto)
+        public ActionResult<Result> AddExpense([FromBody] ExpenseDTO expenseDto)
         {
             // TODO : Validate input if the necessary fields are null if not send bad request
-            var result = new Result<string>();
+            var result = new Result();
             try
             {
                 ExpenseModel expenseModel = new ExpenseModel
@@ -86,15 +86,14 @@ namespace apis.Controllers
                 _appDbContext.Expenses.Add(expenseModel);
                 _appDbContext.SaveChanges();
 
-                result = Result<string>.Success(
-                    $"Expense with id {expenseModel.Id} has been successfully created.",
-                    "No response body"
+                result = Result.Success(
+                    $"Expense with id {expenseModel.Id} has been successfully created."
                 );
             }
             catch (Exception ex)
             {
-                result = Result<string>.Failure(ex.Message);
-                return Problem(ex.Message);
+                result = Result.Failure(ex.Message);
+                return StatusCode(500, result);
             }
             return Ok(result);
         }
