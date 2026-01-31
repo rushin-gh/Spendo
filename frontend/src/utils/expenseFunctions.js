@@ -22,7 +22,7 @@ const GetAllExpenses = async () => {
   }
 };
 
-const AddExpense = (exp) => {
+const AddExpense = async (exp) => {
   let expense = {
     title: exp.title,
     description: exp.description,
@@ -31,7 +31,7 @@ const AddExpense = (exp) => {
 
   const url = URLs.Expense.AddExpense;
   try {
-    const response = fetch(url, {
+    const response = await fetch(url, {
       method: HttpMethods.post,
       headers: {
         "Content-Type": ContentTypes.applicationJson,
@@ -39,6 +39,7 @@ const AddExpense = (exp) => {
       body: JSON.stringify(expense),
     });
 
+    console.log("Expense add ", response.ok);
     if (!response.ok) {
       throw new Error("Api thrown some error.");
     }
@@ -47,15 +48,15 @@ const AddExpense = (exp) => {
   }
 };
 
-const UpdateExpense = (expId, exp) => {
+const UpdateExpense = async (expId, exp) => {
   let expense = {};
   if (exp.title != "") expense.title = exp.title;
   if (exp.description != "") expense.description = exp.description;
   if (exp.amount != "") expense.amount = exp.amount;
 
-  const url = `${URLs.Expense.DeleteExpense}/${expId}`;
+  const url = `${URLs.Expense.UpdateExpense}/${expId}`;
   try {
-    const response = fetch(url, {
+    const response = await fetch(url, {
       method: HttpMethods.patch,
       headers: {
         "Content-Type": ContentTypes.applicationJson,
@@ -82,15 +83,12 @@ const DeleteExpense = async (expId) => {
       },
     });
 
+    console.log(response);
     if (!response.ok) {
       throw new Error("Api thrown some error.");
     }
-
-    const data = await response.json();
-    loadExpenses();
-    return data;
   } catch (err) {
-    console.log("Error");
+    console.log(err);
   }
 };
 

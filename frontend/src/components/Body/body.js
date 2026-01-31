@@ -6,6 +6,10 @@ const Body = () => {
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
 
+  useEffect(() => {
+    loadExpenses();
+  }, []);
+
   const loadExpenses = async () => {
     try {
       const expenses = await GetAllExpenses();
@@ -16,51 +20,69 @@ const Body = () => {
     }
   };
 
-  useEffect(() => {
-    loadExpenses();
-  }, []);
+  const handleActions = async (event, obj) => {
+    if (event == "UpdateExpenseBtnClicked") {
+      await setEditingExpense(obj.exp);
+    } else if (event == "DeleteExpenseBtnClicked") {
+      await DeleteExpense(obj.id);
+      loadExpenses();
+    }
+  };
 
-  return !expenses ? (
-    <div id="body">Error while loading expenses</div>
-  ) : expenses.length == 0 ? (
-    <div id="body">No expenses</div>
-  ) : (
-    <div id="body">
-      <ExpenseAdd
-        editingExpense={editingExpense}
-        setEditingExpense={setEditingExpense}
-        onSave={() => {
-          setEditingExpense(null);
-          loadExpenses();
-        }}
-      />
-      <table>
-        <thead>
-          <tr>
-            {/* <th>Sr</th> */}
-            <th>Title</th>
-            <th>Desc</th>
-            <th>Amount</th>
-            <th>Update</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenses.map((exp) => {
-            return (
-              <tr key={exp.id}>
-                {/* <td>{exp.id}</td> */}
-                <td>{exp.title}</td>
-                <td>{exp.description}</td>
-                <td>{exp.amount}</td>
-                <td onClick={() => setEditingExpense(exp)}>U</td>
-                <td onClick={() => DeleteExpense(exp.id)}>D</td>
+  return (
+    <>
+      <div id="body">
+        <ExpenseAdd
+          editingExpense={editingExpense}
+          setEditingExpense={setEditingExpense}
+          loadExpenses={loadExpenses}
+        />
+        {!expenses ? (
+          <div id="body">Error while loading expenses</div>
+        ) : expenses.length == 0 ? (
+          <div id="body">No expenses</div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                {/* <th>Sr</th> */}
+                <th>Title</th>
+                <th>Desc</th>
+                <th>Amount</th>
+                <th>Update</th>
+                <th>Delete</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            <tbody>
+              {expenses.map((exp) => {
+                return (
+                  <tr key={exp.id}>
+                    {/* <td>{exp.id}</td> */}
+                    <td>{exp.title}</td>
+                    <td>{exp.description}</td>
+                    <td>{exp.amount}</td>
+                    <td
+                      onClick={() =>
+                        handleActions("UpdateExpenseBtnClicked", { exp: exp })
+                      }
+                    >
+                      U
+                    </td>
+                    <td
+                      onClick={() =>
+                        handleActions("DeleteExpenseBtnClicked", { id: exp.id })
+                      }
+                    >
+                      D
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
   );
 };
 

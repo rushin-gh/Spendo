@@ -21,4 +21,10 @@ const ContentTypes = {
   applicationJson: "application/json",
 };
 
-export { URLs, HttpMethods, ContentTypes };
+const ExpenseBtns = {
+  add: "Add",
+  update: "Update",
+  cancel: "Cancel",
+};
+
+export { URLs, HttpMethods, ContentTypes, ExpenseBtns };
