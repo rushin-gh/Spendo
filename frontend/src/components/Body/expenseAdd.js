@@ -1,52 +1,62 @@
 import { useEffect, useState } from "react";
 import { AddExpense, UpdateExpense } from "../../utils/expenseFunctions";
-import { ExpenseBtns } from "../../utils/constants";
 
 const ExpenseAdd = ({ editingExpense, setEditingExpense, loadExpenses }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    amount: "",
+  });
 
+  // Populate form when editing an expense
   useEffect(() => {
-    handleInputs();
+    if (editingExpense) {
+      setFormData({
+        title: editingExpense.title,
+        description: editingExpense.description,
+        amount: editingExpense.amount,
+      });
+    } else {
+      resetForm();
+    }
   }, [editingExpense]);
 
-  const handleButtonClicks = async (btn, expId) => {
-    if (btn == ExpenseBtns.add) {
-      await AddExpense({
-        title: title,
-        description: description,
-        amount: amount,
-      });
-      setValues({ title: "", description: "", amount: "" });
-      loadExpenses();
-    } else if (btn == ExpenseBtns.update) {
-      await UpdateExpense(expId, {
-        title: title,
-        description: description,
-        amount: amount,
-      });
-      setEditingExpense(null);
-      loadExpenses();
-    } else if (btn == ExpenseBtns.cancel) {
-      setEditingExpense(null);
+  const resetForm = () => {
+    setFormData({ title: "", description: "", amount: "" });
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const validateForm = () => {
+    return formData.title && formData.description && formData.amount;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    try {
+      if (editingExpense) {
+        await UpdateExpense(editingExpense.id, formData);
+        setEditingExpense(null);
+      } else {
+        await AddExpense(formData);
+        resetForm();
+      }
+      await loadExpenses();
+    } catch (error) {
+      console.error("Error submitting expense:", error);
+      alert("Failed to save expense. Please try again.");
     }
   };
 
-  const handleInputs = () => {
-    var values = {
-      title: editingExpense ? editingExpense.title : "",
-      description: editingExpense ? editingExpense.description : "",
-      amount: editingExpense ? editingExpense.amount : "",
-    };
-
-    setValues(values);
-  };
-
-  const setValues = (exp) => {
-    setTitle(exp.title);
-    setDescription(exp.description);
-    setAmount(exp.amount);
+  const handleCancel = () => {
+    setEditingExpense(null);
+    resetForm();
   };
 
   return (
@@ -55,48 +65,32 @@ const ExpenseAdd = ({ editingExpense, setEditingExpense, loadExpenses }) => {
         type="text"
         name="expTitle"
         placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={formData.title}
+        onChange={(e) => handleInputChange("title", e.target.value)}
       />
       <input
         type="text"
-        name="expdescription"
-        placeholder="description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        name="expDescription"
+        placeholder="Description"
+        value={formData.description}
+        onChange={(e) => handleInputChange("description", e.target.value)}
       />
       <input
         type="number"
-        name="expAmt"
+        name="expAmount"
         placeholder="Amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
+        value={formData.amount}
+        onChange={(e) => handleInputChange("amount", e.target.value)}
       />
-      {!editingExpense && (
-        <button
-          type="submit"
-          onClick={() => handleButtonClicks(ExpenseBtns.add)}
-        >
-          {ExpenseBtns.add}
-        </button>
-      )}
+
+      <button type="button" onClick={handleSubmit}>
+        {editingExpense ? "Update" : "Add"}
+      </button>
+
       {editingExpense && (
-        <>
-          <button
-            type="submit"
-            onClick={() =>
-              handleButtonClicks(ExpenseBtns.update, editingExpense.id)
-            }
-          >
-            {ExpenseBtns.update}
-          </button>
-          <button
-            type="submit"
-            onClick={() => handleButtonClicks(ExpenseBtns.cancel)}
-          >
-            {ExpenseBtns.cancel}
-          </button>
-        </>
+        <button type="button" onClick={handleCancel}>
+          Cancel
+        </button>
       )}
     </div>
   );
