@@ -1,8 +1,15 @@
 ﻿namespace apis.Models
 {
+    public enum StatusCodes
+    {
+        Ok = 200
+    }
+
     public class Result
     {
         public bool IsSuccess { get; set; }
+
+        public StatusCodes StatusCode { get; set; }
 
         public string? Message { get; set; }
 

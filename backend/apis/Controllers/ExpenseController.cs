@@ -24,7 +24,6 @@ namespace apis.Controllers
         public ActionResult<List<ExpenseWithIdDTO>> GetExpenses()
         {
             List<ExpenseWithIdDTO> expensesWithIds = new List<ExpenseWithIdDTO>();
-            try
             {
                 var dbExpenses = _appDbContext.Expenses;
                 expensesWithIds
@@ -38,10 +37,8 @@ namespace apis.Controllers
                         }
                     )
                 );
-            }
-            catch (Exception ex)
-            {
-                // Exception logging
+                //if (true)
+                //    throw new KeyNotFoundException("Just");
             }
             return Ok(expensesWithIds);
         }
