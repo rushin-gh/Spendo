@@ -23,7 +23,7 @@ namespace apis.Controllers
         [HttpGet("get")]
         public ActionResult<List<ExpenseWithIdDTO>> GetExpenses()
         {
-            List<ExpenseWithIdDTO> expensesWithIds = new List<ExpenseWithIdDTO>();
+            List<ExpenseWithIdDTO> expensesWithIds = [];
             {
                 var dbExpenses = _appDbContext.Expenses;
                 expensesWithIds
@@ -37,8 +37,6 @@ namespace apis.Controllers
                         }
                     )
                 );
-                //if (true)
-                //    throw new KeyNotFoundException("Just");
             }
             return Ok(expensesWithIds);
         }
