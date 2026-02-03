@@ -11,14 +11,9 @@ namespace apis.Controllers
 {
     [Route("api/expense")]
     [ApiController]
-    public class ExpenseController : ControllerBase
+    public class ExpenseController(AppDbContext appDbContext) : ControllerBase
     {
-        private readonly AppDbContext _appDbContext;
-
-        public ExpenseController(AppDbContext appDbContext)
-        {
-            _appDbContext = appDbContext;
-        }
+        private readonly AppDbContext _appDbContext = appDbContext;
 
         [HttpGet("get")]
         public ActionResult<List<ExpenseWithIdDTO>> GetExpenses()
@@ -45,9 +40,12 @@ namespace apis.Controllers
         public ActionResult<ExpenseWithIdDTO> GetSingleExpense([FromRoute(Name = "id")] int expId)
         {
             ExpenseWithIdDTO expenseWithId = new ExpenseWithIdDTO();
-            try
             {
                 var dbExpenseWithId = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId);
+
+                if (dbExpenseWithId == null)
+                    throw new ArgumentException($"Expense with id {expId} doesn't exists");
+
                 expenseWithId = new ExpenseWithIdDTO
                 {
                     Id = dbExpenseWithId.Id,
@@ -56,19 +54,26 @@ namespace apis.Controllers
                     Description = dbExpenseWithId.Description
                 };
             }
-            catch (Exception ex)
-            {
-                // Exception logging
-            }
             return Ok(expenseWithId);
         }
 
         [HttpPost("add")]
         public ActionResult<Result> AddExpense([FromBody] ExpenseDTO expenseDto)
         {
-            // TODO : Validate input if the necessary fields are null if not send bad request
+            // ExpenseDTO validation
+            if (expenseDto == null)
+                throw new ArgumentException("Null expense not allowed");
+
+            if (expenseDto.Title == null || expenseDto.Title == string.Empty)
+                throw new ArgumentException("Title is required field");
+
+            if (!expenseDto.Amount.HasValue)
+                throw new ArgumentException("Amount is required field");
+
+            if (expenseDto.Amount <= 0)
+                throw new ArgumentException("Non positive amount is not allowed in expense");
+
             var result = new Result();
-            try
             {
                 ExpenseModel expenseModel = new ExpenseModel
                 {
@@ -82,13 +87,8 @@ namespace apis.Controllers
                 _appDbContext.SaveChanges();
 
                 result = Result.Success(
-                    $"Expense with id {expenseModel.Id} has been successfully created."
+                    $"Expense has been successfully created with id {expenseModel.Id}."
                 );
-            }
-            catch (Exception ex)
-            {
-                result = Result.Failure(ex.Message);
-                return StatusCode(500, result);
             }
             return Ok(result);
         }
@@ -96,76 +96,46 @@ namespace apis.Controllers
         [HttpPatch("update/{id}")]
         public ActionResult<Result> UpdateExpense([FromRoute(Name = "id")] int expId, [FromBody] ExpenseDTO expenseDto)
         {
-            Result result = new Result();
-            try
+            Result result = new();
             {
-                var expense = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId);
-
-                if (expense == null)
-                {
-                    result.IsSuccess = false;
-                    result.Message = $"Expense with id {expId} does not exists in database.";
-                    return BadRequest(result);
-                }
-
-                if (expenseDto.Amount.HasValue)
-                {
-                    expense.Amount = expenseDto.Amount;
-                }
+                var expense = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId)
+                                ?? throw new ArgumentException($"Expense with id {expId} does not exists in database.");
 
                 if (expenseDto.Title != null)
-                {
                     expense.Title = expenseDto.Title;
-                }
 
                 if (expenseDto.Description != null)
-                {
                     expense.Description = expenseDto.Description;
-                }
+
+                if (expenseDto.Amount.HasValue)
+                    expense.Amount = expenseDto.Amount;
 
                 _appDbContext.SaveChanges();
 
                 result.IsSuccess = true;
                 result.Message = $"Expense with id {expId} has been successfully updated.";
-
-            }
-            catch (Exception ex)
-            {
-                // Exception logging
-                result.IsSuccess = false;
-                result.Message = ex.Message;
             }
 
             return Ok(result);
         }
 
+        // TODO - Work on response of Delete and Update as well
         [HttpPost("delete/{id}")]
-        public ActionResult<Result> DeleteExpense([FromRoute(Name = "id")] int expId)
+        public ActionResult<DataResult<ExpenseDTO>> DeleteExpense([FromRoute(Name = "id")] int expId)
         {
-            Result result = new Result();
-            try
+            DataResult<ExpenseModel> result = new();
             {
-                if (_appDbContext.Expenses.Any(exp => exp.Id == expId))
-                {
-                    _appDbContext.Expenses.Where(exp => exp.Id == expId).ExecuteDelete();
-                    _appDbContext.SaveChanges();
+                if (!_appDbContext.Expenses.Any(exp => exp.Id == expId))
+                    throw new ArgumentException($"Expense with id {expId} does not exists in database.");
 
-                    result.IsSuccess = true;
-                    result.Message = $"Expense with id {expId} has been successfully deleted.";
-                }
-                else
-                {
-                    result.IsSuccess = false;
-                    result.Message = $"Expense with id {expId} does not exists in database.";
-                }
-            }
-            catch (Exception ex)
-            {
-                // Exception logging
-                result.IsSuccess = false;
-                result.Message = ex.Message;
-            }
+                result.Data = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId);
 
+                _appDbContext.Expenses.Where(exp => exp.Id == expId).ExecuteDelete();
+                _appDbContext.SaveChanges();
+
+                result.IsSuccess = true;
+                result.Message = $"Attached expense is successfully deleted";
+            }
             return Ok(result);
         }
     }
