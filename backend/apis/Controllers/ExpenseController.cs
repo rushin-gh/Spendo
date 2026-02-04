@@ -21,6 +21,10 @@ namespace apis.Controllers
             List<ExpenseWithIdDTO> expensesWithIds = [];
             {
                 var dbExpenses = _appDbContext.Expenses;
+                
+                if (dbExpenses == null)
+                    throw new Exception("Error while loading expenses");
+
                 expensesWithIds
                     .AddRange(dbExpenses.Select(
                         exp => new ExpenseWithIdDTO
@@ -41,10 +45,8 @@ namespace apis.Controllers
         {
             ExpenseWithIdDTO expenseWithId = new ExpenseWithIdDTO();
             {
-                var dbExpenseWithId = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId);
-
-                if (dbExpenseWithId == null)
-                    throw new ArgumentException($"Expense with id {expId} doesn't exists");
+                var dbExpenseWithId = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId)
+                                        ?? throw new KeyNotFoundException($"Expense with id {expId} doesn't exists");
 
                 expenseWithId = new ExpenseWithIdDTO
                 {
@@ -71,7 +73,7 @@ namespace apis.Controllers
                 throw new ArgumentException("Amount is required field");
 
             if (expenseDto.Amount <= 0)
-                throw new ArgumentException("Non positive amount is not allowed in expense");
+                throw new ArgumentException("Non positive amount is not allowed");
 
             var result = new Result();
             {
@@ -99,7 +101,7 @@ namespace apis.Controllers
             Result result = new();
             {
                 var expense = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId)
-                                ?? throw new ArgumentException($"Expense with id {expId} does not exists in database.");
+                                ?? throw new KeyNotFoundException($"Expense with id {expId} does not exists in database.");
 
                 if (expenseDto.Title != null)
                     expense.Title = expenseDto.Title;
@@ -126,7 +128,7 @@ namespace apis.Controllers
             DataResult<ExpenseModel> result = new();
             {
                 if (!_appDbContext.Expenses.Any(exp => exp.Id == expId))
-                    throw new ArgumentException($"Expense with id {expId} does not exists in database.");
+                    throw new KeyNotFoundException($"Expense with id {expId} does not exists in database.");
 
                 result.Data = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId);
 

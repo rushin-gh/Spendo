@@ -46,7 +46,7 @@ namespace apis.Middlewares
             {
                 IsSuccess = false,
                 StatusCode = httpContext.Response.StatusCode,
-                Message = exception.Message
+                Message = httpContext.Response.StatusCode >= 500 ? "Internal server error! Please try again later." : exception.Message
             };
 
             return httpContext.Response.WriteAsync(
