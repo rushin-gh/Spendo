@@ -47,3 +47,80 @@ use SpendoDB;
 
  --INSERT INTO Expenses
  --SELECT Title, Description, Amount, Date FROM Expenses
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- SELECT 
+--    COUNT(*) AS TotalSessions
+--FROM sys.dm_exec_sessions;
+
+--SELECT 
+--    session_id,
+--    login_name,
+--    status,
+--    host_name,
+--    program_name
+--FROM sys.dm_exec_sessions
+--WHERE is_user_process = 1;
+
+--Execute sp_who2
+
+--kill 51
+
+--SELECT *
+--FROM sys.dm_exec_requests
+--WHERE blocking_session_id <> 0;
+
+--SELECT 
+--    sqlserver_start_time,
+--    physical_memory_kb / 1024 AS MemoryMB
+--FROM sys.dm_os_sys_info;
+
+--SELECT name, is_disabled
+--FROM sys.server_principals
+--WHERE name = 'spendo_app_user';
+
+--SELECT *
+--FROM sys.server_triggers;
+
+--SELECT *
+--FROM sys.dm_exec_requests
+--WHERE command LIKE '%LOGIN%';
+
+
+--SELECT 
+--    login_name,
+--    COUNT(*) AS Connections
+--FROM sys.dm_exec_sessions
+--WHERE is_user_process = 1
+--GROUP BY login_name;
+
+--SELECT 
+--    @@SERVERNAME AS ServerName,
+--    SERVERPROPERTY('MachineName') AS MachineName,
+--    SERVERPROPERTY('InstanceName') AS InstanceName,
+--    SERVERPROPERTY('IsClustered') AS IsClustered;
+
+--	SELECT @@SERVERNAME, @@VERSION;
