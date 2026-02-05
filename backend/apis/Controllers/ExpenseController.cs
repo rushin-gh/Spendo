@@ -16,67 +16,66 @@ namespace apis.Controllers
         private readonly AppDbContext _appDbContext = appDbContext;
 
         [HttpGet("get")]
-        public ActionResult<List<ExpenseWithIdDTO>> GetExpenses()
+        public ActionResult<DataResult<List<ExpenseWithIdDTO>>> GetExpenses()
         {
-            List<ExpenseWithIdDTO> expensesWithIds = [];
+            DataResult<List<ExpenseWithIdDTO>> result = new(true, "No Response", []);
             {
                 var dbExpenses = _appDbContext.Expenses;
-                
-                if (dbExpenses == null)
-                    throw new Exception("Error while loading expenses");
 
-                expensesWithIds
-                    .AddRange(dbExpenses.Select(
-                        exp => new ExpenseWithIdDTO
-                        {
-                            Id = exp.Id,
-                            Title = exp.Title,
-                            Amount = exp.Amount,
-                            Description = exp.Description
-                        }
-                    )
-                );
+                var expenses = dbExpenses
+                                .Select(
+                                    exp => new ExpenseWithIdDTO
+                                    {
+                                        Id = exp.Id,
+                                        Title = exp.Title,
+                                        Amount = exp.Amount,
+                                        Description = exp.Description
+                                    }
+                                ).ToList();
+
+                result = DataResult<List<ExpenseWithIdDTO>>.Success("Expenses fetched successfully", expenses);
             }
-            return Ok(expensesWithIds);
+            return Ok(result);
         }
 
         [HttpGet("get/{id}")]
-        public ActionResult<ExpenseWithIdDTO> GetSingleExpense([FromRoute(Name = "id")] int expId)
+        public ActionResult<DataResult<ExpenseWithIdDTO>> GetSingleExpense([FromRoute(Name = "id")] int expId)
         {
-            ExpenseWithIdDTO expenseWithId = new ExpenseWithIdDTO();
+            DataResult<ExpenseWithIdDTO> result = new(true, "No Response", new ExpenseWithIdDTO());
             {
                 var dbExpenseWithId = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId)
                                         ?? throw new KeyNotFoundException($"Expense with id {expId} doesn't exists");
 
-                expenseWithId = new ExpenseWithIdDTO
+                ExpenseWithIdDTO expenseWithId = new ExpenseWithIdDTO
                 {
                     Id = dbExpenseWithId.Id,
                     Amount = dbExpenseWithId.Amount,
                     Title = dbExpenseWithId.Title,
                     Description = dbExpenseWithId.Description
                 };
+
+                result = DataResult<ExpenseWithIdDTO>.Success("Expense fetched successfully", expenseWithId);
             }
-            return Ok(expenseWithId);
+            return Ok(result);
         }
 
         [HttpPost("add")]
         public ActionResult<Result> AddExpense([FromBody] ExpenseDTO expenseDto)
         {
-            // ExpenseDTO validation
-            if (expenseDto == null)
-                throw new ArgumentException("Null expense not allowed");
-
-            if (expenseDto.Title == null || expenseDto.Title == string.Empty)
-                throw new ArgumentException("Title is required field");
-
-            if (!expenseDto.Amount.HasValue)
-                throw new ArgumentException("Amount is required field");
-
-            if (expenseDto.Amount <= 0)
-                throw new ArgumentException("Non positive amount is not allowed");
-
-            var result = new Result();
+            Result result = new Result();
             {
+                if (expenseDto == null)
+                    throw new ArgumentException("Null expense not allowed");
+
+                if (expenseDto.Title == null || expenseDto.Title == string.Empty)
+                    throw new ArgumentException("Title is required field");
+
+                if (!expenseDto.Amount.HasValue)
+                    throw new ArgumentException("Amount is required field");
+
+                if (expenseDto.Amount <= 0)
+                    throw new ArgumentException("Non positive amount is not allowed");
+
                 ExpenseModel expenseModel = new ExpenseModel
                 {
                     Amount = expenseDto.Amount,
@@ -92,13 +91,14 @@ namespace apis.Controllers
                     $"Expense has been successfully created with id {expenseModel.Id}."
                 );
             }
-            return Ok(result);
+
+            return Created("ExpenseCreated", result);
         }
 
         [HttpPatch("update/{id}")]
-        public ActionResult<Result> UpdateExpense([FromRoute(Name = "id")] int expId, [FromBody] ExpenseDTO expenseDto)
+        public ActionResult<DataResult<ExpenseModel>> UpdateExpense([FromRoute(Name = "id")] int expId, [FromBody] ExpenseDTO expenseDto)
         {
-            Result result = new();
+            DataResult<ExpenseModel> result = new(true, "No Response", new ExpenseModel());
             {
                 var expense = _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId)
                                 ?? throw new KeyNotFoundException($"Expense with id {expId} does not exists in database.");
@@ -114,16 +114,18 @@ namespace apis.Controllers
 
                 _appDbContext.SaveChanges();
 
-                result.IsSuccess = true;
-                result.Message = $"Expense with id {expId} has been successfully updated.";
-            }
 
+
+                result = DataResult<ExpenseModel>.Success(
+                    $"Expense with id {expId} has been successfully updated", 
+                    _appDbContext.Expenses.FirstOrDefault(exp => exp.Id == expId)
+                );
+            }
             return Ok(result);
         }
 
-        // TODO - Work on response of Delete and Update as well
         [HttpPost("delete/{id}")]
-        public ActionResult<DataResult<ExpenseDTO>> DeleteExpense([FromRoute(Name = "id")] int expId)
+        public ActionResult<DataResult<ExpenseModel>> DeleteExpense([FromRoute(Name = "id")] int expId)
         {
             DataResult<ExpenseModel> result = new();
             {

@@ -34,6 +34,7 @@ namespace apis.Middlewares
         {
             httpContext.Response.ContentType = "application/json";
 
+            // TODO : Handle ArgumentNullException
             httpContext.Response.StatusCode = exception switch
             {
                 ArgumentException => (int)HttpStatusCode.BadRequest,
@@ -46,7 +47,7 @@ namespace apis.Middlewares
             {
                 IsSuccess = false,
                 StatusCode = httpContext.Response.StatusCode,
-                Message = httpContext.Response.StatusCode >= 500 ? "Internal server error! Please try again later." : exception.Message
+                Message = httpContext.Response.StatusCode >= 500 ? "Internal server error!" : exception.Message
             };
 
             return httpContext.Response.WriteAsync(
